@@ -11,6 +11,7 @@ RUN apk --update add --no-cache \
 		oniguruma-dev \
 		gd-dev \
 		zip \
+		icu-dev \
 	&& docker-php-ext-configure gd --with-jpeg --with-freetype \
 	&& docker-php-ext-configure zip --with-zip \
 	&& docker-php-ext-install -j "$(nproc)" \
@@ -26,6 +27,36 @@ RUN apk --update add --no-cache \
         pdo_pgsql \
 		mysqli \
 		zip \
+		intl \
+    && apk del \
+        autoconf \
+        binutils \
+        db \
+        file \
+        g++ \
+        gcc \
+        gmp \
+        isl \
+        libatomic \
+        libbz2 \
+        libc-dev \
+        libffi \
+        libgcc \
+        libgomp \
+        libldap \
+        libmagic \
+        libsasl \
+        libstdc++ \
+        m4 \
+        make \
+        mpc1 \
+        musl-dev \
+        perl \
+        pkgconf \
+        pkgconfig \
+        re2c \
+        sqlite-libs \
+        zlib-dev \
 	&& docker-php-ext-configure bcmath --enable-bcmath
 
 #		zlib-dev	 --virtual .build-deps
@@ -40,11 +71,12 @@ RUN set -ex; \
 #			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 #	)";
 RUN	apk del .build-deps; \
-	rm -rf /tmp/pear
+	rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
 # fix work iconv library with alphine
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
+
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
