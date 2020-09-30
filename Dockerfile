@@ -121,8 +121,8 @@ RUN mkdir /var/log/php-fpm
 #RUN php -i
 #RUN php -r 'var_dump(gd_info());'
 
-RUN echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories \
-    && apk --no-cache add shadow && usermod -u 1000 www-data && apk del shadow
+# 101 is nginx group id
+RUN apk --no-cache add shadow && usermod -u 102 www-data && groupmod -g 101 www-data && apk del shadow
 
 EXPOSE 9000
 CMD ["php-fpm"]
