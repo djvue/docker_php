@@ -121,5 +121,7 @@ RUN mkdir /var/log/php-fpm
 #RUN php -i
 #RUN php -r 'var_dump(gd_info());'
 
+RUN usermod -u 1000 www-data
+
 EXPOSE 9000
 CMD ["php-fpm"]
