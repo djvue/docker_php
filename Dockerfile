@@ -1,4 +1,4 @@
-FROM php:7.4.10-fpm-alpine
+FROM ggpa/php-pre-repo-build:8.0.0
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
@@ -18,7 +18,6 @@ RUN apk --update add --no-cache \
 		bcmath \
 		exif \
 		gd \
-		json \
 		mbstring \
 		opcache \
 		pdo \
@@ -81,6 +80,9 @@ ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
 RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.enable_cli=1'; \
+        echo 'opcache.jit_buffer_size=50MB'; \
 		echo 'opcache.memory_consumption=128'; \
 		echo 'opcache.interned_strings_buffer=8'; \
 		echo 'opcache.max_accelerated_files=4000'; \
@@ -89,7 +91,6 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
 RUN { \
-		echo 'error_reporting = E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR'; \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
 		echo 'log_errors = On'; \
@@ -115,6 +116,7 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /composer
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer self-update --snapshot
 
 RUN mkdir /var/log/php-fpm
 
