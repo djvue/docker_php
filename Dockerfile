@@ -1,4 +1,4 @@
-FROM ggpa/php-pre-repo-build:8.0.0
+FROM php:8.0.0-fpm-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
