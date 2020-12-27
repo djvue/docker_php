@@ -113,8 +113,8 @@ RUN { \
 
 RUN { \
 		echo 'xdebug.remote_enable=1'; \
-		echo 'xdebug.remote_host=0.0.0.0'; \
-		echo 'xdebug.remote_port=9001'; \
+		echo 'xdebug.client_host=0.0.0.0'; \
+		echo 'xdebug.client_port=9003'; \
 	} > /usr/local/etc/php/conf.d/xdebug.ini
 
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
