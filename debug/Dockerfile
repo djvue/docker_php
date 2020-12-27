@@ -112,7 +112,7 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/local.ini
 
 RUN { \
-		echo 'xdebug.remote_enable=1'; \
+		echo 'xdebug.mode=develop'; \
 		echo 'xdebug.client_host=0.0.0.0'; \
 		echo 'xdebug.client_port=9003'; \
 	} > /usr/local/etc/php/conf.d/xdebug.ini
