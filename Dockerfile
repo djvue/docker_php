@@ -61,7 +61,7 @@ RUN apk --update add --no-cache \
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
 	&& pecl install -o -f redis \
 	&& docker-php-ext-enable redis \
-	&& apk del .build-deps \
+	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
 # set recommended PHP.ini settings

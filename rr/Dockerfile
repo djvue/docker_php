@@ -62,7 +62,7 @@ RUN apk --update add --no-cache \
 	&& docker-php-ext-enable redis \
 	&& pecl install xdebug \
 	&& docker-php-ext-enable xdebug \
-	&& apk del .build-deps \
+	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
 # set recommended PHP.ini settings
