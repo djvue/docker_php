@@ -96,9 +96,12 @@ RUN { \
 		echo 'memory_limit = -1'; \
 	} > /usr/local/etc/php/conf.d/local.ini \
 	&& { \
-		echo 'xdebug.mode=develop'; \
-		echo 'xdebug.client_host=0.0.0.0'; \
+		echo 'xdebug.mode=debug'; \
+		echo 'xdebug.client_host=host.docker.internal'; \
 		echo 'xdebug.client_port=9003'; \
+		echo 'xdebug.idekey=PHPSTORM'; \
+		echo 'xdebug.discover_client_host=1'; \
+		echo 'xdebug.start_with_request=yes'; \
 		echo 'xdebug.log=/var/log/php/xdebug.log'; \
 	} > /usr/local/etc/php/conf.d/xdebug.ini
 
