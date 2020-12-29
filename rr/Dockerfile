@@ -12,10 +12,9 @@ RUN apk --update add --no-cache \
 		gd-dev \
 		zip \
 		icu-dev \
-       ; \
-	docker-php-ext-configure gd --with-jpeg --with-freetype; \
-	docker-php-ext-configure zip --with-zip; \
-	docker-php-ext-install -j "$(nproc)"; \
+	&& docker-php-ext-configure gd --with-jpeg --with-freetype  \
+	&& docker-php-ext-configure zip --with-zip \
+	&& docker-php-ext-install -j "$(nproc)" \
 		bcmath \
 		exif \
 		gd \
@@ -27,8 +26,7 @@ RUN apk --update add --no-cache \
         pdo_pgsql \
 		zip \
 		intl \
-        ; \
-    apk del \
+    && apk del \
         autoconf \
         binutils \
         db \
@@ -57,15 +55,15 @@ RUN apk --update add --no-cache \
         re2c \
         sqlite-libs \
         zlib-dev \
-        ; \
-	docker-php-ext-configure bcmath --enable-bcmath; \
+	&& docker-php-ext-configure bcmath --enable-bcmath \
 	# fix work iconv library with alphine
-    apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv; \
-    set -ex; \
-	pecl install -o -f redis; \
-	docker-php-ext-enable redis; \
-	#apk del .build-deps; \
-	rm -rf /tmp/pear /tmp/* /var/cache/apk/*
+    && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
+	&& pecl install -o -f redis \
+	&& docker-php-ext-enable redis \
+	&& pecl install xdebug \
+	&& docker-php-ext-enable xdebug \
+	&& apk del .build-deps \
+	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -78,8 +76,8 @@ RUN { \
 		echo 'opcache.max_accelerated_files=4000'; \
 		echo 'opcache.revalidate_freq=2'; \
 		echo 'opcache.fast_shutdown=1'; \
-	} > /usr/local/etc/php/conf.d/opcache-recommended.ini;\
-	{ \
+	} > /usr/local/etc/php/conf.d/opcache-recommended.ini \
+	&& { \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
 		echo 'log_errors = On'; \
@@ -88,8 +86,8 @@ RUN { \
 		echo 'ignore_repeated_errors = On'; \
 		echo 'ignore_repeated_source = Off'; \
 		echo 'html_errors = Off'; \
-	} > /usr/local/etc/php/conf.d/error-logging.ini;\
-    { \
+	} > /usr/local/etc/php/conf.d/error-logging.ini \
+    && { \
 		echo 'upload_max_filesize=1000M'; \
 		echo 'post_max_size=1000M'; \
 		echo 'date.timezone = Europe/Moscow'; \
@@ -100,23 +98,23 @@ ENV \
     COMPOSER_ALLOW_SUPERUSER 1 \
     COMPOSER_HOME /composer
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
-    composer self-update --snapshot; \
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer self-update --snapshot \
     # set user ids
-    apk --no-cache add shadow; \
-    usermod -u 102 www-data; \
-    groupmod -g 101 www-data ; \
-    apk del shadow;
+    && apk --no-cache add shadow \
+    && usermod -u 102 www-data \
+    && groupmod -g 101 www-data \
+    && apk del shadow
 
 # install roadrunner
 ENV RR_VERSION 1.9.1
-RUN mkdir /tmp/rr; \
-  cd /tmp/rr; \
-  echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json; \
-  composer install; \
-  vendor/bin/rr get-binary -l /usr/local/bin; \
-  rm -rf /tmp/rr; \
-  composer clear-cache
+RUN mkdir /tmp/rr \
+  && cd /tmp/rr \
+  && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
+  && composer install \
+  && vendor/bin/rr get-binary -l /usr/local/bin \
+  && rm -rf /tmp/rr \
+  && composer clear-cache
 
 WORKDIR /var/www
 EXPOSE 9000
