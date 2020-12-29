@@ -63,7 +63,7 @@ RUN apk --update add --no-cache \
 RUN set -ex; \
 	pecl install -o -f redis; \
 	docker-php-ext-enable redis; \
-	pecl install xdebug; \
+	apk add php7-pecl-xdebug; \
 	docker-php-ext-enable xdebug
 
 #RUN	runDeps="$( \
@@ -116,14 +116,16 @@ RUN { \
 		echo 'xdebug.mode=develop'; \
 		echo 'xdebug.client_host=0.0.0.0'; \
 		echo 'xdebug.client_port=9003'; \
+		echo 'xdebug.log=/var/log/php/xdebug.log'; \
 	} > /usr/local/etc/php/conf.d/xdebug.ini
 
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /var/www
 
-ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_HOME /composer
+ENV \
+    COMPOSER_ALLOW_SUPERUSER 1 \
+    COMPOSER_HOME /composer
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer self-update --snapshot

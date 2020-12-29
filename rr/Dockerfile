@@ -1,4 +1,4 @@
-FROM php:8.0.0-fpm-alpine
+FROM php:8.0.0-cli-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
@@ -96,8 +96,6 @@ RUN { \
 		echo 'memory_limit = -1'; \
 	} > /usr/local/etc/php/conf.d/local.ini
 
-COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /composer
 
@@ -108,10 +106,18 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
     usermod -u 102 www-data; \
     groupmod -g 101 www-data ; \
     apk del shadow;
-    #create php-fpm logs directory
-    mkdir /var/log/php-fpm
+
+# install roadrunner
+ENV RR_VERSION 1.9.1
+RUN mkdir /tmp/rr; \
+  cd /tmp/rr; \
+  echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json; \
+  composer install; \
+  vendor/bin/rr get-binary -l /usr/local/bin; \
+  rm -rf /tmp/rr; \
+  composer clear-cache
 
 WORKDIR /var/www
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD 'sh -c "rr -c ./.rr.yaml serve -d"'
