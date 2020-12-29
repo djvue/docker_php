@@ -107,7 +107,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
     apk --no-cache add shadow; \
     usermod -u 102 www-data; \
     groupmod -g 101 www-data ; \
-    apk del shadow;
+    apk del shadow; \
     #create php-fpm logs directory
     mkdir /var/log/php-fpm
 
