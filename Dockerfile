@@ -64,7 +64,7 @@ RUN apk --update add --no-cache \
     set -ex; \
 	pecl install -o -f redis; \
 	docker-php-ext-enable redis; \
-	apk del .build-deps; \
+	#apk del .build-deps; \
 	rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
 # set recommended PHP.ini settings
@@ -98,8 +98,9 @@ RUN { \
 
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
-ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_HOME /composer
+ENV \
+    COMPOSER_ALLOW_SUPERUSER 1 \
+    COMPOSER_HOME /composer
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
     composer self-update --snapshot; \
@@ -113,5 +114,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /var/www
 EXPOSE 9000
-
 CMD ["php-fpm"]
