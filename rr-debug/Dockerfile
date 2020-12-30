@@ -60,6 +60,8 @@ RUN apk --update add --no-cache \
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
 	&& pecl install -o -f redis \
 	&& docker-php-ext-enable redis \
+	&& pecl install xdebug \
+	&& docker-php-ext-enable xdebug \
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
@@ -90,7 +92,16 @@ RUN { \
 		echo 'post_max_size=1000M'; \
 		echo 'date.timezone = Europe/Moscow'; \
 		echo 'memory_limit = -1'; \
-	} > /usr/local/etc/php/conf.d/local.ini
+	} > /usr/local/etc/php/conf.d/local.ini \
+    && { \
+        echo 'xdebug.mode=debug'; \
+        echo 'xdebug.client_host=host.docker.internal'; \
+        echo 'xdebug.client_port=9003'; \
+        echo 'xdebug.idekey=PHPSTORM'; \
+        echo 'xdebug.discover_client_host=1'; \
+        echo 'xdebug.start_with_request=yes'; \
+        echo 'xdebug.log=/var/log/php/xdebug.log'; \
+    } > /usr/local/etc/php/conf.d/xdebug.ini
 
 ENV \
     COMPOSER_ALLOW_SUPERUSER 1 \
@@ -107,15 +118,15 @@ RUN mkdir /var/log/php \
 
 # install roadrunner
 ENV RR_VERSION 1.9.1
-RUN mkdir /tmp/rr \
-  && cd /tmp/rr \
-  && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
-  && composer install \
-  && vendor/bin/rr get-binary -l /usr/local/bin \
-  && rm -rf /tmp/rr \
-  && composer clear-cache
+RUN  mkdir /tmp/rr \
+    && cd /tmp/rr \
+    && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
+    && composer install \
+    && vendor/bin/rr get-binary -l /usr/local/bin \
+    && rm -rf /tmp/rr \
+    && composer clear-cache
 
 WORKDIR /var/www
 EXPOSE 8080
 
-CMD /bin/sh -c 'rr -c ./.rr.yaml serve -d'
+CMD /bin/sh -c 'rr -c ./.rr.yaml serve -d -v'
