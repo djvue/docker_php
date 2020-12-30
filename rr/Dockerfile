@@ -113,7 +113,8 @@ RUN mkdir /var/log/php \
   && cd /tmp/rr \
   && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
   && composer install \
-  && vendor/bin/rr get-binary -l /usr/local/bin \
+  && ./vendor/bin/rr get
+  && mv rr /usr/local/bin/rr \
   && rm -rf /tmp/rr \
   && composer clear-cache
 
