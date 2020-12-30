@@ -70,7 +70,7 @@ RUN apk --update add --no-cache \
 RUN { \
         echo 'opcache.enable=1'; \
         echo 'opcache.enable_cli=1'; \
-        echo 'opcache.jit_buffer_size=50M'; \
+        #echo 'opcache.jit_buffer_size=50M'; \
 		echo 'opcache.memory_consumption=128'; \
 		echo 'opcache.interned_strings_buffer=8'; \
 		echo 'opcache.max_accelerated_files=4000'; \
@@ -113,8 +113,7 @@ RUN mkdir /var/log/php \
   && cd /tmp/rr \
   && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
   && composer install \
-  && ./vendor/bin/rr get
-  && mv rr /usr/local/bin/rr \
+  && vendor/bin/rr get-binary -l /usr/local/bin \
   && rm -rf /tmp/rr \
   && composer clear-cache
 
