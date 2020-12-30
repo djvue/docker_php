@@ -66,6 +66,21 @@ RUN apk --update add --no-cache \
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
+ENV \
+    COMPOSER_ALLOW_SUPERUSER 1 \
+    COMPOSER_HOME /composer
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer self-update --snapshot \
+    # set user ids
+    && apk --no-cache add shadow \
+    && usermod -u 102 www-data \
+    && groupmod -g 101 www-data \
+    && apk del shadow \
+    #create php-fpm logs directory
+    && mkdir /var/log/php-fpm \
+    && mkdir /var/log/php
+
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
 RUN { \
@@ -107,21 +122,7 @@ RUN { \
 
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
-ENV \
-    COMPOSER_ALLOW_SUPERUSER 1 \
-    COMPOSER_HOME /composer
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer self-update --snapshot \
-    # set user ids
-    && apk --no-cache add shadow \
-    && usermod -u 102 www-data \
-    && groupmod -g 101 www-data \
-    && apk del shadow \
-    #create php-fpm logs directory
-    && mkdir /var/log/php-fpm \
-    && mkdir /var/log/php
-
 WORKDIR /var/www
 EXPOSE 9000
+
 CMD ["php-fpm"]
