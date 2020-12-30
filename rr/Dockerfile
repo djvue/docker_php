@@ -120,4 +120,4 @@ RUN mkdir /var/log/php \
 WORKDIR /var/www
 EXPOSE 9000
 
-CMD 'sh -c "rr -c ./.rr.yaml serve -d"'
+CMD 'rr -c ./.rr.yaml serve -d'
