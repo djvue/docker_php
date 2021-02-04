@@ -26,6 +26,7 @@ RUN apk --update add --no-cache \
         pdo_pgsql \
 		zip \
 		intl \
+		sockets \
     && apk del \
         autoconf \
         binutils \
