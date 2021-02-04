@@ -56,6 +56,7 @@ RUN apk --update add --no-cache \
         re2c \
         sqlite-libs \
         zlib-dev \
+        || true \
 	&& docker-php-ext-configure bcmath --enable-bcmath \
 	# fix work iconv library with alphine
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
