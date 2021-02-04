@@ -27,7 +27,6 @@ RUN apk --update add --no-cache \
         mysqli \
 		zip \
 		intl \
-		sockets \
     && apk del \
         autoconf \
         binutils \
