@@ -1,4 +1,4 @@
-FROM php:8.0.0-cli-alpine
+FROM php:8.0.1-cli-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
