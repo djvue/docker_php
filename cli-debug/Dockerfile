@@ -131,4 +131,4 @@ RUN { \
 WORKDIR /var/www
 EXPOSE 8080
 
-CMD ["php-fpm"]
+CMD ["php", "-a"]
