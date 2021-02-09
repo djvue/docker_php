@@ -1,4 +1,4 @@
-FROM php:8.0.2-fpm-alpine
+FROM php:8.0.2-cli-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
@@ -24,9 +24,9 @@ RUN apk --update add --no-cache \
         pdo_mysql \
         pgsql \
         pdo_pgsql \
-        mysqli \
 		zip \
 		intl \
+		sockets \
     && apk del \
         autoconf \
         binutils \
@@ -65,21 +65,18 @@ RUN apk --update add --no-cache \
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
-COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-
 ENV \
     COMPOSER_ALLOW_SUPERUSER 1 \
     COMPOSER_HOME /composer
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+RUN mkdir /var/log/php \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer self-update --snapshot \
     # set user ids
     && apk --no-cache add shadow \
     && usermod -u 102 www-data \
     && groupmod -g 101 www-data \
-    && apk del shadow \
-    #create php-fpm logs directory
-    && mkdir /var/log/php-fpm
+    && apk del shadow
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -97,7 +94,7 @@ RUN { \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
 		echo 'log_errors = On'; \
-		echo 'error_log = /dev/stderr'; \
+		echo 'error_log = /var/log/php/error.log'; \
 		echo 'log_errors_max_len = 1024'; \
 		echo 'ignore_repeated_errors = On'; \
 		echo 'ignore_repeated_source = Off'; \
@@ -111,6 +108,6 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/local.ini
 
 WORKDIR /var/www
-EXPOSE 9000
+EXPOSE 8080
 
-CMD ["php-fpm"]
+CMD ["php", "-a"]

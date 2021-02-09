@@ -1,4 +1,4 @@
-FROM php:8.0.2-fpm-alpine
+FROM php:8.0.2-cli-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
@@ -24,9 +24,9 @@ RUN apk --update add --no-cache \
         pdo_mysql \
         pgsql \
         pdo_pgsql \
-        mysqli \
 		zip \
 		intl \
+		sockets \
     && apk del \
         autoconf \
         binutils \
@@ -62,24 +62,33 @@ RUN apk --update add --no-cache \
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
 	&& pecl install -o -f redis \
 	&& docker-php-ext-enable redis \
+	&& pecl install xdebug \
+	&& docker-php-ext-enable xdebug \
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
-
-COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
 ENV \
     COMPOSER_ALLOW_SUPERUSER 1 \
     COMPOSER_HOME /composer
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+RUN mkdir /var/log/php \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer self-update --snapshot \
     # set user ids
     && apk --no-cache add shadow \
     && usermod -u 102 www-data \
     && groupmod -g 101 www-data \
-    && apk del shadow \
-    #create php-fpm logs directory
-    && mkdir /var/log/php-fpm
+    && apk del shadow
+
+# install roadrunner
+ENV RR_VERSION 1.9.1
+RUN  mkdir /tmp/rr \
+    && cd /tmp/rr \
+    && echo "{\"require\":{\"spiral/roadrunner\":\"${RR_VERSION}\"}}" >> composer.json \
+    && composer install \
+    && vendor/bin/rr get-binary -l /usr/local/bin \
+    && rm -rf /tmp/rr \
+    && composer clear-cache
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -97,7 +106,7 @@ RUN { \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
 		echo 'log_errors = On'; \
-		echo 'error_log = /dev/stderr'; \
+		echo 'error_log = /var/log/php/error.log'; \
 		echo 'log_errors_max_len = 1024'; \
 		echo 'ignore_repeated_errors = On'; \
 		echo 'ignore_repeated_source = Off'; \
@@ -108,9 +117,18 @@ RUN { \
 		echo 'post_max_size=1000M'; \
 		echo 'date.timezone = Europe/Moscow'; \
 		echo 'memory_limit = -1'; \
-	} > /usr/local/etc/php/conf.d/local.ini
+	} > /usr/local/etc/php/conf.d/local.ini \
+    && { \
+        echo 'xdebug.mode=debug'; \
+        echo 'xdebug.client_host=host.docker.internal'; \
+        echo 'xdebug.client_port=9003'; \
+        echo 'xdebug.idekey=PHPSTORM'; \
+        echo 'xdebug.discover_client_host=1'; \
+        echo 'xdebug.start_with_request=yes'; \
+        echo 'xdebug.log=/var/log/php/xdebug.log'; \
+    } > /usr/local/etc/php/conf.d/xdebug.ini
 
 WORKDIR /var/www
-EXPOSE 9000
+EXPOSE 8080
 
 CMD ["php-fpm"]
