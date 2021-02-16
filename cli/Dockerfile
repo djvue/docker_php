@@ -101,6 +101,7 @@ RUN { \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini \
     && { \
+        echo 'expose_php = off'; \
 		echo 'upload_max_filesize=1000M'; \
 		echo 'post_max_size=1000M'; \
 		echo 'date.timezone = Europe/Moscow'; \
