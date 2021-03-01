@@ -69,7 +69,8 @@ RUN apk --update add --no-cache \
 
 ENV \
     COMPOSER_ALLOW_SUPERUSER 1 \
-    COMPOSER_HOME /composer
+    COMPOSER_HOME /composer \
+    LD_PRELOAD /usr/lib/preloadable_libiconv.so
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer self-update --snapshot \
