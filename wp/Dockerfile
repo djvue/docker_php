@@ -111,10 +111,10 @@ RUN { \
 		echo 'memory_limit = -1'; \
 	} > /usr/local/etc/php/conf.d/local.ini
 
-RUN apk add nginx
+RUN apk add nginx && mkdir -p /run/nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www
 EXPOSE 80 9000
 
-CMD ["php-fpm"]
+CMD ["nginx && php-fpm"]
