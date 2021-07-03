@@ -60,10 +60,13 @@ RUN apk --update add --no-cache \
 	&& docker-php-ext-configure bcmath --enable-bcmath \
 	# fix work iconv library with alphine
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
-	&& pecl install -o -f redis \
-	&& docker-php-ext-enable redis \
-	&& pecl install xdebug \
-	&& docker-php-ext-enable xdebug \
+    # redis
+    && mkdir -p /usr/src/php/ext/redis \
+    && curl -fsSL --ipv4 https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C "/usr/src/php/ext/redis" --strip 1 \
+    && docker-php-ext-install redis \
+    # xdebug
+    && pecl install xdebug \
+	&& docker-php-ext-enable xdebug
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
@@ -114,12 +117,12 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/local.ini \
 	&& { \
 		echo 'xdebug.mode=debug'; \
-		echo 'xdebug.client_host=host.docker.internal'; \
+		echo 'xdebug.client_host=dockerhost'; \
 		echo 'xdebug.client_port=9003'; \
 		echo 'xdebug.idekey=PHPSTORM'; \
 		echo 'xdebug.discover_client_host=1'; \
 		echo 'xdebug.start_with_request=yes'; \
-		echo 'xdebug.log=/var/log/php/xdebug.log'; \
+		#echo 'xdebug.log=/var/log/php/xdebug.log'; \
 	} > /usr/local/etc/php/conf.d/xdebug.ini
 
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf

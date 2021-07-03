@@ -60,8 +60,10 @@ RUN apk --update add --no-cache \
 	&& docker-php-ext-configure bcmath --enable-bcmath \
 	# fix work iconv library with alphine
     && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv \
-	&& pecl install -o -f redis \
-	&& docker-php-ext-enable redis \
+    # redis
+    && mkdir -p /usr/src/php/ext/redis \
+    && curl -fsSL --ipv4 https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C "/usr/src/php/ext/redis" --strip 1 \
+    && docker-php-ext-install redis \
 	#&& apk del .build-deps \
 	&& rm -rf /tmp/pear /tmp/* /var/cache/apk/*
 
