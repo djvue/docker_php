@@ -1,4 +1,4 @@
-FROM php:8.0.2-cli-alpine
+FROM php:8.0.8-cli-alpine
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN apk --update add --no-cache \
@@ -73,7 +73,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 
 RUN mkdir /var/log/php \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer self-update --snapshot \
+    && composer self-update \
     # set user ids
     && apk --no-cache add shadow \
     && usermod -u 102 www-data \
